@@ -1,97 +1,135 @@
 
 import json
-import os
-import urllib.parse
-import urllib.request
-from datetime import datetime, timezone
 from pathlib import Path
 
-REPO = os.environ["GITHUB_REPOSITORY"]
-TOKEN = os.environ["GITHUB_TOKEN"]
+# Lokasi file JSON wallpaper
 JSON_FILE = Path("wallpaper.json")
 
 
-def get_image_path(url):
-    parsed = urllib.parse.urlparse(url)
-    parts = urllib.parse.unquote(
-        parsed.path
-    ).strip("/").split("/")
+def load_wallpapers():
+    """Membaca data wallpaper dari JSON."""
+    if not JSON_FILE.exists():
+        raise FileNotFoundError(
+            f"File {JSON_FILE} tidak ditemukan!"
+        )
 
-    if parsed.netloc == "raw.githubusercontent.com":
-        if len(parts) >= 6 and parts[2:4] == [
-            "refs", "heads"
-        ]:
-            return "/".join(parts[5:])
-        if len(parts) >= 4:
-            return "/".join(parts[3:])
+    with JSON_FILE.open("r", encoding="utf-8") as file:
+        wallpapers = json.load(file)
 
-    if parsed.netloc == "github.com":
-        if len(parts) >= 5 and parts[2] == "blob":
-            return "/".join(parts[4:])
+    if not isinstance(wallpapers, list):
+        raise ValueError(
+            "Format wallpaper.json harus berupa array JSON."
+        )
 
-    return None
-
-
-def get_last_update(url):
-    path = get_image_path(url)
-
-    if not path:
-        return datetime.min.replace(tzinfo=timezone.utc)
-
-    query = urllib.parse.urlencode({
-        "path": path,
-        "per_page": 1
-    })
-
-    api_url = (
-        f"https://api.github.com/repos/{REPO}/commits?"
-        f"{query}"
-    )
-
-    request = urllib.request.Request(
-        api_url,
-        headers={
-            "Authorization": f"Bearer {TOKEN}",
-            "Accept": "application/vnd.github+json",
-            "X-GitHub-Api-Version": "2022-11-28"
-        }
-    )
-
-    try:
-        with urllib.request.urlopen(request) as response:
-            commits = json.load(response)
-
-        if not commits:
-            return datetime.min.replace(
-                tzinfo=timezone.utc
+    for index, wallpaper in enumerate(wallpapers):
+        if not isinstance(wallpaper, dict):
+            raise ValueError(
+                f"Data wallpaper pada indeks {index} tidak valid."
             )
 
-        date = commits[0]["commit"]["committer"]["date"]
-        return datetime.fromisoformat(
-            date.replace("Z", "+00:00")
+        if "url" not in wallpaper:
+            raise ValueError(
+                f"Wallpaper pada indeks {index} tidak memiliki URL."
+            )
+
+    return wallpapers
+
+
+def assign_ids(wallpapers):
+    """
+    Membuat ID otomatis untuk wallpaper yang belum memilikinya.
+
+    Jika semua wallpaper belum memiliki ID, ID diberikan
+    berdasarkan urutan saat ini agar urutannya tidak berubah
+    pada proses pertama.
+
+    Wallpaper baru yang ditambahkan kemudian akan mendapat
+    ID lebih besar daripada ID yang sudah ada.
+    """
+    if not wallpapers:
+        return
+
+    existing_ids = []
+
+    for wallpaper in wallpapers:
+        wallpaper_id = wallpaper.get("id")
+
+        if wallpaper_id is not None:
+            if (
+                isinstance(wallpaper_id, bool)
+                or not isinstance(wallpaper_id, int)
+                or wallpaper_id < 1
+            ):
+                raise ValueError(
+                    f"ID wallpaper harus berupa bilangan bulat positif: "
+                    f"{wallpaper_id!r}"
+                )
+
+            existing_ids.append(wallpaper_id)
+
+    if len(existing_ids) != len(set(existing_ids)):
+        raise ValueError(
+            "Ditemukan ID duplikat. Setiap wallpaper harus "
+            "memiliki ID yang unik."
         )
 
-    except Exception as error:
-        raise RuntimeError(
-            f"Gagal mengambil tanggal file {path}: {error}"
-        )
+    # Pertama kali dijalankan: semua wallpaper belum punya ID.
+    if not existing_ids:
+        total = len(wallpapers)
+
+        for index, wallpaper in enumerate(wallpapers):
+            wallpaper["id"] = total - index
+
+        return
+
+    # Wallpaper baru yang belum memiliki ID mendapat nomor
+    # di atas ID terbesar yang sudah digunakan.
+    next_id = max(existing_ids) + 1
+
+    for wallpaper in wallpapers:
+        if "id" not in wallpaper:
+            wallpaper["id"] = next_id
+            next_id += 1
 
 
-with JSON_FILE.open("r", encoding="utf-8") as file:
-    wallpapers = json.load(file)
-
-wallpapers.sort(
-    key=lambda item: int(item.get("id", 0)),
-    reverse=True
-)
-
-with JSON_FILE.open("w", encoding="utf-8") as file:
-    json.dump(
-        wallpapers,
-        file,
-        indent=2,
-        ensure_ascii=False
+def sort_wallpapers(wallpapers):
+    """Mengurutkan ID terbesar ke terkecil."""
+    wallpapers.sort(
+        key=lambda wallpaper: wallpaper["id"],
+        reverse=True
     )
-    file.write("\n")
 
-print("Wallpaper berhasil diurutkan!")
+    return wallpapers
+
+
+def save_wallpapers(wallpapers):
+    """Menyimpan hasil pengurutan ke wallpaper.json."""
+    with JSON_FILE.open("w", encoding="utf-8") as file:
+        json.dump(
+            wallpapers,
+            file,
+            indent=2,
+            ensure_ascii=False
+        )
+        file.write("\n")
+
+
+def main():
+    wallpapers = load_wallpapers()
+
+    assign_ids(wallpapers)
+    sort_wallpapers(wallpapers)
+    save_wallpapers(wallpapers)
+
+    print("Berhasil mengurutkan wallpaper!")
+    print(f"Jumlah wallpaper: {len(wallpapers)}")
+
+    for wallpaper in wallpapers:
+        print(
+            f"ID: {wallpaper['id']} | "
+            f"Nama: {wallpaper.get('name', 'Tanpa nama')}"
+        )
+
+
+if __name__ == "__main__":
+    main()
