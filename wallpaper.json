@@ -1,5 +1,12 @@
 [
   {
+    "id": 26,
+    "name": "Semeru Mountain Wallpaper",
+    "author": "OPPO",
+    "url": "https://raw.githubusercontent.com/mhmdltfii/stock-aurawalls/main/Brand%20Phone/OPPO/Oppo%20Wallpaper%20Mountain%20Bromo%20Semeru.jpg",
+    "collections": "OPPO, Realme"
+  },
+  {
     "id": 25,
     "name": "ColorOS 5.0 Wallpaper",
     "author": "OPPO",
@@ -173,12 +180,5 @@
     "author": "OPPO",
     "url": "https://raw.githubusercontent.com/mhmdltfii/stock-aurawalls/main/Brand%20Phone/OPPO/ColorOS%202/ColorOS%202%20Wallpaper%20(1).jpg",
     "collections": "OPPO"
-  },
-  {
-    "id": 26,
-    "name": "Semeru Mountain Wallpaper",
-    "author": "OPPO",
-    "url": "https://raw.githubusercontent.com/mhmdltfii/stock-aurawalls/main/Brand%20Phone/OPPO/Oppo%20Wallpaper%20Mountain%20Bromo%20Semeru.jpg",
-    "collections": "OPPO, Realme"
   }
 ]
