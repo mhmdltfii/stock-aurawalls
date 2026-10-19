@@ -1,12 +1,5 @@
 [
   {
-    "id": 2,
-    "name": "ColorOS 2 Wallpaper",
-    "author": "OPPO",
-    "url": "https://raw.githubusercontent.com/mhmdltfii/stock-aurawalls/main/Brand%20Phone/OPPO/ColorOS%202/ColorOS%202%20Wallpaper%20(2).jpg",
-    "collections": "OPPO"
-  },
-  {
     "id": 7,
     "name": "ColorOS 2 Wallpaper",
     "author": "OPPO",
@@ -39,6 +32,13 @@
     "name": "ColorOS 2 Wallpaper",
     "author": "OPPO",
     "url": "https://raw.githubusercontent.com/mhmdltfii/stock-aurawalls/main/Brand%20Phone/OPPO/ColorOS%202/ColorOS%202%20Wallpaper%20(3).jpg",
+    "collections": "OPPO"
+  },
+  {
+    "id": 2,
+    "name": "ColorOS 2 Wallpaper",
+    "author": "OPPO",
+    "url": "https://raw.githubusercontent.com/mhmdltfii/stock-aurawalls/main/Brand%20Phone/OPPO/ColorOS%202/ColorOS%202%20Wallpaper%20(2).jpg",
     "collections": "OPPO"
   },
   {
