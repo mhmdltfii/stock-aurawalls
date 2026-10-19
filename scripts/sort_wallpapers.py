@@ -81,7 +81,7 @@ with JSON_FILE.open("r", encoding="utf-8") as file:
     wallpapers = json.load(file)
 
 wallpapers.sort(
-    key=lambda item: get_last_update(item["url"]),
+    key=lambda item: int(item.get("id",0)),
     reverse=True
 )
 
